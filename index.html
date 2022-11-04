@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>simple messanger</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+
+    <div class="container">
+        <h3 class="mt-5 headerName">simple messanger</h3>
+        <div class="onlineStatus">
+          <div id="isOnlineStatus" class="spinner-grow spinner-grow-sm text-success" role="status" style="display: none;">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+        <div class="mb-3 text-secondary">
+          <span id="chatInfo"></span>
+          <span style="float: right;">mockapi.io server</span>
+        </div>
+        <div class="form-floating">
+          <div id="chatTextArea" class="container border chatTextArea"></div>
+        </div>
+        <div class="input-group shadow-sm mb-3">
+          <button class="btn btn-outline-primary" type="button" id="sendBtn">Send</button>
+          <input id="messageInput" type="text" class="form-control border-primary" placeholder="your message here..." aria-label="Send" aria-describedby="button-addon2">
+          <button class="btn btn-outline-primary" type="button" id="historyBtn">history</button>
+          <button class="btn btn-outline-primary" type="button" id="darkThemeBtn">&#127767;</button>
+        </div>
+
+        <p>
+          <a class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" href="#debugOptions" role="button" aria-expanded="false" aria-controls="debugOptions">
+            debug options
+          </a>
+        </p>
+
+        <p id="debugOptions" class="text-secondary collapse">
+          <button class="btn btn-outline-warning btn-sm" type="button" id="clearCacheBtn">clear Cache</button><br>
+          <span class="font-monospace">'/rate:: newrate newstop'</span>           change refresh rate in sec<br>
+          <span class="font-monospace">'/stop'</span>           stop refresh<br>
+          <span class="font-monospace">'/info'</span>                            current user info<br>
+          <span class="font-monospace">'/change: newname newcolor'</span>       change current user(string) color(css)<br>
+          <span class="font-monospace">'/del:: number'</span>       delete custom amount messages on server<br>
+          <span class="font-monospace">'/msg:: json'</span>       custom message:<br>
+          <span class="font-monospace">'/msg:: {"userMessage":"hello","date":"2022-11-03T12:26:47.589Z","userId":101010,"userName":"custom","userColor":"red"}'</span><br>
+          <span class="font-monospace">'/saveHistory'</span>       back up history (wont be deleted after clearCache)<br>
+          <span class="font-monospace">'/baseUrl:: url'</span>     set new base url<br>
+          <span class="font-monospace">'/apiKey:: key'</span>     set new api key (optional)<br>
+        </p>
+    </div>
+
+    <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="myModalLabel">Login</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form>
+
+              <div class="input-group mb-3">
+                <span class="input-group-text">Ім'я</span>
+                <input id="modalNameInput" type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="modalNameInput">
+              </div>
+              <div class="input-group mb-3">
+                <span class="input-group-text">Api key</span>
+                <input id="modalApiKeyInput" type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="modalApiKeyInput" value="">
+              </div>
+
+            </form>
+          </div>
+          <div id="modalBtns" class="modal-footer">
+            <button id="modalBtnClose" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button id="modalBtnOK" type="button" class="btn btn-primary">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

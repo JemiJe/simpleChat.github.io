@@ -1,0 +1,29 @@
+#chatTextArea {
+    height: 300px; 
+    resize: none;
+}
+.chatTextArea {
+    height: 300px;
+    overflow: auto;
+}
+.headerName,
+.onlineStatus {
+    display: inline-block;
+}
+
+.darkTheme,
+input.darkTheme,
+input.darkTheme:focus {
+    background-color: #202124;
+}
+
+h3.darkTheme,
+input.darkTheme,
+input.darkTheme:focus {
+    color: wheat;
+    border-color: #a89777 !important;
+}
+
+#chatTextArea.darkTheme {
+    border-color: wheat !important;
+}
