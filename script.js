@@ -501,7 +501,7 @@ modalBtnsElem.addEventListener('click', (e) => {
 
         if(!apiKey) {
             myModal.hide();
-            showCustomMessage('client', 'apiKey wasn\'t set for access to mockapi.io');
+            showCustomMessage('client', 'missing apiKey for access to mockapi.io, set manually using /api (see debug options)');
             return;
         }
 
