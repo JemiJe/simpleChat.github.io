@@ -589,6 +589,13 @@ document.addEventListener('messangerEvent.isCode', (e) => {
         case '/apiKey':
             setStorageData(codeValue, 'apiKey');
             showCustomMessage('client', `new api key: ${getStorageData().apiKey} for ${getStorageData().baseUrl}`);
+
+            userInfoInit(userName, apiKey);
+            chatAreaInit();
+            refresh.start();
+    
+            setStorageData(true, 'isAlwaysOnline');
+            setStorageData('off', 'isDark');
             break;
 
         default:
