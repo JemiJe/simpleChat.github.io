@@ -244,6 +244,7 @@ const dateFormating = dateObj => {
     const today = new Date();
     const date = new Date(dateObj);
     const prevWeek = new Date(today.setDate( today.getDate() - 7 ));
+    const prevMin = new Date(today.setMinutes( today.getMinutes() - 1 ));
 
     let [ month1, day, hourMin] = date.toLocaleString('en-GB', { 
         month: 'short',
@@ -256,7 +257,7 @@ const dateFormating = dateObj => {
     if( date.getDay() == today.getDay() ) day = '';
     if( date < prevWeek ) day = date.toLocaleString('en-GB', { day: '2-digit' });
     if( date.getMonth() == today.getMonth() ) month1 = '';
-    if( date.getMinutes() !== today.getMinutes() ) hourMin = hourMin.slice(0,5);
+    if( date < prevMin ) hourMin = hourMin.slice(0,5);
     if( date.getFullYear() < today.getFullYear() ) hourMin = `${hourMin} ${date.getFullYear()}`;
 
     return { monthStr: month1, dayStr: day.slice(0,3), hourMinStr: hourMin};
@@ -448,7 +449,7 @@ const showHistory = () => {
 };
 
 // events ---
-sendButton.addEventListener('click', () => sendMessage(msgInput.value));
+sendButton.addEventListener('click', () => { if(msgInput.value) sendMessage(msgInput.value) });
 
 const darkThemeBtn = document.querySelector('#darkThemeBtn');
 darkThemeBtn.addEventListener('click', () => {
@@ -461,10 +462,8 @@ historyBtn.addEventListener('click', () => {
     showHistory();
 });
 
-
-
-msgInput.addEventListener('keypress', (event) => {
-    if (event.code === 'Enter') sendMessage(msgInput.value);
+msgInput.addEventListener('keypress', event => {
+    if (event.code === 'Enter') if(msgInput.value) sendMessage(msgInput.value);
 });
 document.querySelector('#clearCacheBtn').addEventListener('click', () => {
     
@@ -542,7 +541,7 @@ document.addEventListener('messangerEvent.isCode', (e) => {
             break;
 
         case '/change':
-            const [name, color] = codeValue.split(' ');
+            const [name, color] = codeValue.split('_');
             if(name) setStorageData(name.slice(0, 9), 'userName');
             if(color) setStorageData(color, 'userColor');
             showUserInfo();
