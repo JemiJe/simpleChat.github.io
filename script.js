@@ -39,7 +39,7 @@ const getBaseUrl = () => {
             baseUrlWithApiKey.host = `${apiKey}.` + baseUrlWithApiKey.host;
             return baseUrlWithApiKey;
         } else {
-            showCustomMessage('client', 'missing apiKey for access to mockapi.io, set manually using /api (see debug options)');
+            showCustomMessage('client', `(${apiKey}) missing/invalid apiKey for access to mockapi.io, refresh page and enter api key again`);
             return false;
         }
     }
@@ -501,7 +501,7 @@ modalBtnsElem.addEventListener('click', (e) => {
 
         if(!apiKey) {
             myModal.hide();
-            showCustomMessage('client', 'missing apiKey for access to mockapi.io, set manually using /api (see debug options)');
+            showCustomMessage('client', `${apiKey} missing/invalid apiKey for access to mockapi.io, refresh page and enter api key again`);
             return;
         }
 
@@ -513,6 +513,7 @@ modalBtnsElem.addEventListener('click', (e) => {
         setStorageData('off', 'isDark');
      
         myModal.hide();
+        sendMessage(`new user "${userName}" has registered`);
     }
 });
 
@@ -588,14 +589,7 @@ document.addEventListener('messangerEvent.isCode', (e) => {
 
         case '/apiKey':
             setStorageData(codeValue, 'apiKey');
-            showCustomMessage('client', `new api key: ${getStorageData().apiKey} for ${getStorageData().baseUrl}`);
-
-            userInfoInit(userName, apiKey);
-            chatAreaInit();
-            refresh.start();
-    
-            setStorageData(true, 'isAlwaysOnline');
-            setStorageData('off', 'isDark');
+            showCustomMessage('client', `new api key: ${getStorageData().apiKey} was set for ${getStorageData().baseUrl}`);
             break;
 
         default:
