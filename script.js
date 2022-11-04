@@ -39,7 +39,7 @@ const getBaseUrl = () => {
             baseUrlWithApiKey.host = `${apiKey}.` + baseUrlWithApiKey.host;
             return baseUrlWithApiKey;
         } else {
-            showCustomMessage('client', 'apiKey wasn\'t set for access to mockapi.io');
+            showCustomMessage('client', 'missing apiKey for access to mockapi.io, set manually using /api (see debug options)');
             return false;
         }
     }
