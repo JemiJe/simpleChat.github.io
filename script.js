@@ -178,10 +178,13 @@ const getAndShowMessage2 = async () => {
                 }
             }
         }
+        if(resp.status == 429) {
+            showCustomMessage('server', 'too many requests: ' + error);
+        }
     } catch (error) {
-        console.log(error);
+        if(error) console.log(error);
         setStorageData('error', 'isOnline');
-        showCustomMessage('server', 'server error: ' + error);
+        if(error) showCustomMessage('server', 'server error: ' + error);
     }
 }
 
@@ -471,7 +474,7 @@ document.querySelector('#clearCacheBtn').addEventListener('click', () => {
 
 // inits ---
 
-let refreshRateMs = 1 * 1000;
+let refreshRateMs = 2 * 1000;
 let refreshStopAfterMs = 30 * 1000;
 const refresh = new refreshChatAreaLoop2(refreshRateMs, false, 50);
 
@@ -513,7 +516,7 @@ modalBtnsElem.addEventListener('click', (e) => {
         setStorageData('off', 'isDark');
      
         myModal.hide();
-        sendMessage(`new user "${userName}" has registered`);
+        sendMessage(`new user "${getStorageData().userName}" has registered`);
     }
 });
 
