@@ -1,26 +1,5 @@
-// simple messanger v1.0 (03 Nov 2022)
-// all back-end on mockapi.io server
-
-// server should return object messageObj with props:
-// messageObj.items - messages array
-// messageObj.count - server prop of total number of messages on server (integer)
-
-// example of messageObj.items item on server:
-// {
-//     date: "2022-11-01T22:59:39.798Z",    // new Date() from client
-//     id: "6",                             // mockapi.io server prop (should't send from client)
-//     userColor: "hwb(260deg 0% 25%)",
-//     userId: 724525,
-//     userMessage: "hello!",
-//     userName: "chrome1",
-
-//     isCustom: false,
-//     trueDate: new Date(),
-//     trueUserId: 724525
-// }
-
-// url                         https://mockapi.io/api/v1/messageObj
-// with api key (example)      https://588c0242ec0215be123e7dee.mockapi.io/api/v1/messageObj
+// simple chat v1.0 (03 Nov 2022)
+// https://github.com/JemiJe/simpleChat.github.io
 
 const sendButton = document.querySelector('#sendBtn');
 const chatArea = document.querySelector('#chatTextArea');
@@ -241,12 +220,15 @@ const chatAreaInit = () => {
 }
 
 const dateFormating = dateObj => {
-    const today = new Date();
-    const date = new Date(dateObj);
-    const prevWeek = new Date(today.setDate( today.getDate() - 7 ));
-    const prevMin = new Date(today.setMinutes( today.getMinutes() - 1 ));
+    const today = new Date().getTime();
+    const date = new Date(dateObj).getTime();
 
-    let [ month1, day, hourMin] = date.toLocaleString('en-GB', { 
+    const prevWeek = new Date(new Date().setDate( new Date().getDate() - 7 )).getTime();
+    const prevMin = new Date(new Date().setMinutes( new Date().getMinutes() - 1 )).getTime();
+    const prevDay = new Date(new Date().setDate( new Date().getDate() - 1 )).getTime();
+    const prevMonth = new Date(new Date().setMonth( new Date().getMonth() - 1 )).getTime();
+
+    let [ month1, day, hourMin] = new Date(date).toLocaleString('en-GB', { 
         month: 'short',
         weekday: 'short', 
         hour: '2-digit', 
@@ -254,11 +236,12 @@ const dateFormating = dateObj => {
         second: '2-digit'
     }).split(' ');
 
-    if( date.getDay() == today.getDay() ) day = '';
-    if( date < prevWeek ) day = date.toLocaleString('en-GB', { day: '2-digit' });
-    if( date.getMonth() == today.getMonth() ) month1 = '';
-    if( date < prevMin ) hourMin = hourMin.slice(0,5);
-    if( date.getFullYear() < today.getFullYear() ) hourMin = `${hourMin} ${date.getFullYear()}`;
+    if( prevWeek < date ) day = new Date(date).toLocaleString('en-GB', { weekday: 'short' });
+    if( prevWeek > date ) day = new Date(date).toLocaleString('en-GB', { day: '2-digit' });
+    if( prevDay < date ) day = '';
+    if( prevMonth < date ) month1 = '';
+    if( prevMin > date ) hourMin = hourMin.slice(0,5);
+    if( new Date(date).getFullYear() < new Date(today).getFullYear() ) hourMin = `${hourMin} ${new Date(date).getFullYear()}`;
 
     return { monthStr: month1, dayStr: day.slice(0,3), hourMinStr: hourMin};
 };
@@ -448,6 +431,17 @@ const showHistory = () => {
     showCustomMessage('client', `total messages in history: ${msgsArr.length}`, style);
 };
 
+const isOnlineLastHour = () => {
+    const prevTime = getStorageData().isOnlineTimeStamp;
+    const nowMinusHour = new Date( new Date().setHours( new Date().getHours() - 1 ) ).getTime();
+
+    if( nowMinusHour > prevTime ) {
+        setStorageData( new Date().getTime(), 'isOnlineTimeStamp' );
+        return false;
+    }
+    return true;
+};
+
 // events ---
 sendButton.addEventListener('click', () => { if(msgInput.value) sendMessage(msgInput.value) });
 
@@ -488,6 +482,7 @@ if ( !localStorage.messangerData ) {
     chatAreaInit();
     refresh.start();
     toggleDarkTheme( getStorageData().isDark );
+    if( !isOnlineLastHour() ) sendMessage(`${getStorageData().userName} is online`);
 }
 
 // events2 ---
@@ -513,6 +508,7 @@ modalBtnsElem.addEventListener('click', (e) => {
 
         setStorageData(true, 'isAlwaysOnline');
         setStorageData('off', 'isDark');
+        setStorageData( new Date().getTime(), 'isOnlineTimeStamp' );
      
         myModal.hide();
         sendMessage(`new user "${getStorageData().userName}" has registered`);
