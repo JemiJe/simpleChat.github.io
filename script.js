@@ -261,7 +261,7 @@ const showMessage = (msg, isDebug, customStyle) => {
     <div class="row messageRow ${italic}" style="color: ${userColor};${newStyle}">
         <div class="col-1 fw-semibold">${userName}:</div>
         <div class="col">${isCustomBadge} ${userMessage}</div>
-        <div class="col-1 fw-light text-end">${dateStr.dayStr} ${dateStr.monthStr}</div>
+        <div class="col-1 fw-light text-end">${dateStr.monthStr} ${dateStr.dayStr}</div>
         <div class="col-1 fw-light text-start">${dateStr.hourMinStr}</div>
     </div>
     `;
