@@ -11,6 +11,16 @@
     display: inline-block;
 }
 
+.messageRow {
+    display: flex;
+}
+.messageRow > div {
+    flex: 1;
+}
+.messageRow > div.userMessage {
+    flex: 10;
+}
+
 .darkTheme,
 input.darkTheme,
 input.darkTheme:focus {

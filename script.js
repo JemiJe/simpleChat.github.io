@@ -239,7 +239,7 @@ const dateFormating = dateObj => {
     if( prevWeek < date ) day = new Date(date).toLocaleString('en-GB', { weekday: 'short' });
     if( prevWeek > date ) day = new Date(date).toLocaleString('en-GB', { day: '2-digit' });
     if( prevDay < date ) day = '';
-    if( prevMonth < date ) month1 = '';
+    if( prevMonth < date && prevWeek < date ) month1 = '';
     if( prevMin > date ) hourMin = hourMin.slice(0,5);
     if( new Date(date).getFullYear() < new Date(today).getFullYear() ) hourMin = `${hourMin} ${new Date(date).getFullYear()}`;
 
@@ -258,11 +258,11 @@ const showMessage = (msg, isDebug, customStyle) => {
     const newStyle = customStyle ? customStyle : '';
     
     chatArea.innerHTML += `
-    <div class="row messageRow ${italic}" style="color: ${userColor};${newStyle}">
-        <div class="col-1 fw-semibold">${userName}:</div>
-        <div class="col">${isCustomBadge} ${userMessage}</div>
-        <div class="col-1 fw-light text-end">${dateStr.monthStr} ${dateStr.dayStr}</div>
-        <div class="col-1 fw-light text-start">${dateStr.hourMinStr}</div>
+    <div class="messageRow ${italic}" style="color: ${userColor};${newStyle}">
+        <div class="fw-semibold">${userName}:</div>
+        <div class="userMessage">${isCustomBadge} ${userMessage}</div>
+        <div class="fw-light text-end">${dateStr.monthStr} ${dateStr.dayStr}</div>
+        <div class="fw-light text-center">${dateStr.hourMinStr}</div>
     </div>
     `;
 
@@ -298,7 +298,10 @@ class refreshChatAreaLoop2 {
         let serverMsgAmount = messages.count;
         setStorageData(serverMsgAmount, 'messagesOnServerAmount');
 
-        if(serverMsgAmount > this.maxMsgsOnServer) deleteMessages(true);
+        if(serverMsgAmount > this.maxMsgsOnServer){ 
+            await deleteMessages(true);
+            chatAreaInit();
+        }
     }
 
     checkAndDeleteMsgs() {
