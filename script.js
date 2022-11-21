@@ -488,6 +488,8 @@ if ( !localStorage.messangerData ) {
     if( !isOnlineLastHour() ) sendMessage(`${getStorageData().userName} is online`);
 }
 
+console.log('to see some interesting options type "/debug"');
+
 // events2 ---
 modalNameInput.addEventListener('keypress', event => {if (event.code === 'Enter') document.querySelector('#modalBtnOK').click();});
 modalApiKeyInput.addEventListener('keypress', event => {if (event.code === 'Enter') document.querySelector('#modalBtnOK').click();});
@@ -591,6 +593,13 @@ document.addEventListener('messangerEvent.isCode', (e) => {
         case '/apiKey':
             setStorageData(codeValue, 'apiKey');
             showCustomMessage('client', `new api key: ${getStorageData().apiKey} was set for ${getStorageData().baseUrl}`);
+            break;
+
+        case '/debug':
+            const debugElems = document.querySelectorAll('.debugElemHide');
+            for(let elem of debugElems) {
+                elem.classList.remove('debugElemHide');
+            };
             break;
 
         default:

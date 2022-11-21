@@ -17,7 +17,7 @@
           </div>
         </div>
         <div class="mb-3 text-secondary">
-          <span id="chatInfo"></span>
+          <span id="chatInfo" class="debugElemHide"></span>
           <span style="float: right;">mockapi.io server</span>
         </div>
         <div class="form-floating">
@@ -30,13 +30,13 @@
           <button class="btn btn-outline-primary" type="button" id="darkThemeBtn">&#127767;</button>
         </div>
 
-        <p>
+        <p class="debugElemHide">
           <a class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" href="#debugOptions" role="button" aria-expanded="false" aria-controls="debugOptions">
             debug options
           </a>
         </p>
 
-        <p id="debugOptions" class="text-secondary collapse">
+        <p id="debugOptions" class="debugElemHide text-secondary collapse">
           <button class="btn btn-outline-warning btn-sm" type="button" id="clearCacheBtn">clear Cache</button><br>
           <span class="font-monospace">'/rate:: newrate newstop'</span>           change refresh rate in sec<br>
           <span class="font-monospace">'/stop'</span>           stop refresh<br>
