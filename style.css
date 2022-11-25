@@ -1,26 +1,118 @@
 #chatTextArea {
-    height: 300px; 
+    height: 500px; 
     resize: none;
 }
 .chatTextArea {
-    height: 300px;
+    height: 500px;
     overflow: auto;
 }
+
 .headerName,
 .onlineStatus {
     display: inline-block;
 }
 
-.messageRow {
-    display: flex;
+@media screen and (max-height: 700px) {
+    .chatTextArea, #chatTextArea {
+        height: 400px;
+    }
+    .headerName {
+        display: flex;
+        justify-content: center;
+        font-size: 2em;
+    }
 }
-.messageRow > div {
-    flex: 1;
-}
-.messageRow > div.userMessage {
-    flex: 10;
+@media screen and (max-height: 500px) {
+    .chatTextArea, #chatTextArea {
+        height: 300px;
+    }
+    .headerName {
+        display: flex;
+        justify-content: center;
+        font-size: 2em;
+    }
 }
 
+
+
+.headerName.isOnline {
+    transition: 1s;
+    animation: onlineHeaderAnimation 3s infinite;
+    animation-timing-function: ease-in-out;
+}
+.headerName.isOffline {
+    transition: 1s;
+    animation: offlineHeaderAnimation 3s infinite;
+    animation-timing-function: ease-in-out;
+}
+
+@keyframes onlineHeaderAnimation {
+    from {
+        color: #99ff00;
+        transform: rotate();
+    }
+    50% {
+        color: #00d200;
+        transform: rotate();
+    }
+    to {
+        color: #99ff00;
+        transform: rotate();
+    }
+}
+
+@keyframes offlineHeaderAnimation {
+    from {
+        color: #ffd900;
+        transform: rotate();
+    }
+    50% {
+        color: #fa1500;
+        transform: rotate();
+    }
+    to {
+        color: #ffd900;
+        transform: rotate();
+    }
+}
+
+.messageRow2 {
+    display: flex;
+    flex-direction: column;
+    color: #00d200;
+    padding: 8px 5px;
+}
+
+@keyframes messageAppearing {
+    from {
+        opacity: 0;
+        transform: rotate();
+    }
+    to {
+        opacity: 1;
+        transform: rotate();
+    }
+}
+
+.messageRow2 > .messageRow2__date {
+    align-self: flex-end;
+    font-size: 0.8em;
+}
+
+.messageRow2 > .messageRow2__userName {
+    display: flex;
+    justify-content: space-between;
+}
+
+.messageRow2__userName >.messageRow2__userName__date {
+    font-weight: 100;
+    font-size: 0.8em;
+    align-self: center;
+}
+
+.darkTheme {
+    transition: 0.2s;
+}
 .darkTheme,
 input.darkTheme,
 input.darkTheme:focus {
@@ -43,4 +135,25 @@ p.debugElemHide {
 }
 #chatInfo.debugElemHide {
     opacity: 0;
+}
+
+#chatTextArea,
+.input-group {
+    transition: 0.3s;
+    animation-name: scaleShort;
+    animation-duration: 0.2s;
+}
+.input-group {
+    animation-delay: 0.4s;
+}
+@keyframes scaleShort {
+    from {
+        transform: scale(1.0);
+    }
+    50% {
+        transform: scale(1.025);
+    }
+    to {
+        transform: scale(1.0);
+    }
 }

@@ -11,10 +11,10 @@ const setBaseUrl = baseUrl => {
 
 const getBaseUrl = () => {
 
-    if( getStorageData().hasOwnProperty('apiKey') ) {
-        const apiKey = getStorageData().apiKey; 
-        if(apiKey) {
-            let baseUrlWithApiKey = new URL( getStorageData().baseUrl );
+    if (getStorageData().hasOwnProperty('apiKey')) {
+        const apiKey = getStorageData().apiKey;
+        if (apiKey) {
+            let baseUrlWithApiKey = new URL(getStorageData().baseUrl);
             baseUrlWithApiKey.host = `${apiKey}.` + baseUrlWithApiKey.host;
             return baseUrlWithApiKey;
         } else {
@@ -27,18 +27,18 @@ const getBaseUrl = () => {
 };
 
 const userInfoInit = (name, apiKey) => {
-    if ( localStorage.messangerData ) return getStorageData();
+    if (localStorage.messangerData) return getStorageData();
 
-    setStorageData( setNameAndId(name) );
+    setStorageData(setNameAndId(name));
     setBaseUrl('https://mockapi.io/api/v1/messageObj');
-    setStorageData( apiKey, 'apiKey' );
-    setStorageData( false, 'history' );
+    setStorageData(apiKey, 'apiKey');
+    setStorageData(false, 'history');
 };
 
 const setNameAndId = (name) => {
     const randNum = Math.trunc(Math.random() * 1000000);
-    
-    let newName = name ? name.slice(0,9) : 'user' + randNum;
+
+    let newName = name ? name.slice(0, 9) : 'user' + randNum;
     const id = randNum;
     const userMsgColor = setUserColorStyle(id);
 
@@ -59,18 +59,18 @@ const setStorageData = (data, key) => {
     localStorage.setItem('messangerData', JSON.stringify(data));
 };
 const getStorageData = () => {
-    return JSON.parse( localStorage.getItem('messangerData') );
+    return JSON.parse(localStorage.getItem('messangerData'));
 };
 
 const sendMessage = (msg, isServiceMsg, isCustomMessage) => {
     const message = msg;
     clearInput();
 
-    if(isSpecCode(message)) return;
+    if (isSpecCode(message)) return;
 
-    const { userId, userName, userColor } = isServiceMsg ? 
-                                            { userId: 000, userName: 'service', userColor: 'orange' }
-                                            : getStorageData();
+    const { userId, userName, userColor } = isServiceMsg ?
+        { userId: 000, userName: 'service', userColor: 'orange' }
+        : getStorageData();
 
     let messageBody = {
         userMessage: message,
@@ -82,26 +82,26 @@ const sendMessage = (msg, isServiceMsg, isCustomMessage) => {
         isCustom: false,
         trueDate: new Date(),
         trueUserId: userId
-    };                                                
-    
-    if(isCustomMessage) {
+    };
+
+    if (isCustomMessage) {
         messageBody = msg; // custom message body must be Object
     }
-    
-    const baseUrl = getBaseUrl();                                            
+
+    const baseUrl = getBaseUrl();
     fetch(baseUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json;charset=utf-8'
         },
-        body: JSON.stringify( messageBody )
+        body: JSON.stringify(messageBody)
     })
-    .then((response) => {
-        if(response.status == 413) {
-            showCustomMessage('server', 'overload');
-            return;
-        }
-    });
+        .then((response) => {
+            if (response.status == 413) {
+                showCustomMessage('server', 'overload');
+                return;
+            }
+        });
 };
 
 const deleteMessages = async (onlyOne, amount) => {
@@ -110,19 +110,19 @@ const deleteMessages = async (onlyOne, amount) => {
     let messages = await resp.json();
     let messagesArr = messages.items;
     let messagesOnServer = messages.count;
-    
-    let messagesIds = [ messagesArr[1].id ];                //exclude fist service msg 
-    if(!onlyOne) {
-        messagesIds = messagesArr.map( msg => msg.id );
+
+    let messagesIds = [messagesArr[1].id];                //exclude fist service msg 
+    if (!onlyOne) {
+        messagesIds = messagesArr.map(msg => msg.id);
         messagesIds.shift();                                //exclude fist service msg 
     }
-    if(!onlyOne && +amount < messagesOnServer) {
-        messagesIds = messagesIds.filter( (msgId, i) => i < +amount );
+    if (!onlyOne && +amount < messagesOnServer) {
+        messagesIds = messagesIds.filter((msgId, i) => i < +amount);
     }
 
     try {
-        for ( let id of messagesIds ) {
-            await new Promise( r => setTimeout(r, 300) );
+        for (let id of messagesIds) {
+            await new Promise(r => setTimeout(r, 300));
             await fetch(`${baseUrl}/${id}`, { method: 'DELETE' });
         }
         console.log('some messages have been deleted (due to refreshChatAreaLoop2 .maxMsgsOnServer value )');
@@ -138,48 +138,48 @@ const getAndShowMessage2 = async () => {
         const baseUrl = getBaseUrl();
         let resp = await fetch(baseUrl);
 
-        if(resp.ok) {
+        if (resp.ok) {
 
             let messages = await resp.json();
             let msgsArrCurrent = messages.items;
             let msgsArrPrev = getStorageData().messagesArr;
 
-            if(msgsArrCurrent.length > msgsArrPrev.length) {
-                
+            if (msgsArrCurrent.length > msgsArrPrev.length) {
+
                 setStorageData(msgsArrCurrent, 'messagesArr');
-                
+
                 msgsArrCurrent.splice(0, msgsArrPrev.length);
-                
-                for(let msg of msgsArrCurrent) {
+
+                for (let msg of msgsArrCurrent) {
                     if (msg !== undefined) showMessage(msg);
                     setStorageData(++curentMsgsAmount, 'messagesCounter');
-                    setStorageData( [...getStorageData().history, msg] , 'history');
+                    setStorageData([...getStorageData().history, msg], 'history');
                 }
             }
         }
-        if(resp.status == 429) {
+        if (resp.status == 429) {
             showCustomMessage('server', 'too many requests: ' + error);
         }
     } catch (error) {
-        if(error) console.log(error);
+        if (error) console.log(error);
         setStorageData('error', 'isOnline');
-        if(error) showCustomMessage('server', 'server error: ' + error);
+        if (error) showCustomMessage('server', 'server error: ' + error);
     }
 }
 
 const chatAreaInit = () => {
-    
-    if ( !localStorage.messangerData ) return;
-    
+
+    if (!localStorage.messangerData) return;
+
     const baseUrl = getBaseUrl();
     fetch(baseUrl)
         .then(response => {
 
-            if(!response.ok) {
+            if (!response.ok) {
                 throw new Error(response.status + ' status error');
             }
 
-            if(response.status !== 200) {
+            if (response.status !== 200) {
                 chatAreaInit();
                 return;
             }
@@ -187,82 +187,94 @@ const chatAreaInit = () => {
             return response.json();
         })
         .then(allMessages => {
-            
+
             clearChatArea();
 
             const allMessagesItems = allMessages.items;
 
-            if( !getStorageData().history ) setStorageData(allMessagesItems, 'history');
-            
-            if( allMessagesItems.length ) {
+            if (!getStorageData().history) setStorageData(allMessagesItems, 'history');
 
-                let lastMsgNumber = Number.parseInt( allMessagesItems[allMessagesItems.length - 1].id );
-                if(lastMsgNumber) setStorageData(lastMsgNumber, 'messagesCounter');
+            if (allMessagesItems.length) {
+
+                let lastMsgNumber = Number.parseInt(allMessagesItems[allMessagesItems.length - 1].id);
+                if (lastMsgNumber) setStorageData(lastMsgNumber, 'messagesCounter');
 
                 setStorageData(+allMessagesItems[0].id, 'msgIdToDelete');
-                
+
                 setStorageData(allMessagesItems, 'messagesArr');
-                for( let msg of allMessagesItems ) {
-                    showMessage(msg);
+
+                for(let i = 0; i < allMessagesItems.length; i++) {
+                    if( i === allMessagesItems.length - 1 ) {
+                        showMessage(allMessagesItems[i], false, 'transition: 0.5s;animation: messageAppearing 1s;');
+                        return;
+                    }
+                    showMessage(allMessagesItems[i]);
                 }
+
+                // for (let msg of allMessagesItems) {
+                //     showMessage(msg);
+                // }
 
             } else {
                 sendMessage('server is online', true);
                 setStorageData(1, 'messagesCounter');
                 setStorageData([], 'messagesArr');
-            }                    
+            }
         })
-        .catch( error => {
+        .catch(error => {
             console.log(error);
             setStorageData('error', 'isOnline');
             showCustomMessage('server', 'server error: ' + error);
-        } );
+        });
 }
 
 const dateFormating = dateObj => {
     const today = new Date().getTime();
     const date = new Date(dateObj).getTime();
 
-    const prevWeek = new Date(new Date().setDate( new Date().getDate() - 7 )).getTime();
-    const prevMin = new Date(new Date().setMinutes( new Date().getMinutes() - 1 )).getTime();
-    const prevDay = new Date(new Date().setDate( new Date().getDate() - 1 )).getTime();
-    const prevMonth = new Date(new Date().setMonth( new Date().getMonth() - 1 )).getTime();
+    const prevWeek = new Date(new Date().setDate(new Date().getDate() - 7)).getTime();
+    const prevMin = new Date(new Date().setMinutes(new Date().getMinutes() - 1)).getTime();
+    const prevDay = new Date(new Date().setDate(new Date().getDate() - 1)).getTime();
+    const prevMonth = new Date(new Date().setMonth(new Date().getMonth() - 1)).getTime();
 
-    let [ month1, day, hourMin] = new Date(date).toLocaleString('en-GB', { 
+    let [month1, day, hourMin] = new Date(date).toLocaleString('en-GB', {
         month: 'short',
-        weekday: 'short', 
-        hour: '2-digit', 
+        weekday: 'short',
+        hour: '2-digit',
         minute: '2-digit',
         second: '2-digit'
     }).split(' ');
 
-    if( prevWeek < date ) day = new Date(date).toLocaleString('en-GB', { weekday: 'short' });
-    if( prevWeek > date ) day = new Date(date).toLocaleString('en-GB', { day: '2-digit' });
-    if( prevDay < date ) day = '';
-    if( prevMonth < date && prevWeek < date ) month1 = '';
-    if( prevMin > date ) hourMin = hourMin.slice(0,5);
-    if( new Date(date).getFullYear() < new Date(today).getFullYear() ) hourMin = `${hourMin} ${new Date(date).getFullYear()}`;
+    if (prevWeek < date) day = new Date(date).toLocaleString('en-GB', { weekday: 'short' });
+    if (prevWeek > date) day = new Date(date).toLocaleString('en-GB', { day: '2-digit' });
+    if (prevDay < date) day = '';
+    if (prevMonth < date && prevWeek < date) month1 = '';
+    if (prevMin > date) hourMin = hourMin.slice(0, 5);
+    if (new Date(date).getFullYear() < new Date(today).getFullYear()) hourMin = `${hourMin} ${new Date(date).getFullYear()}`;
 
-    return { monthStr: month1, dayStr: day.slice(0,3), hourMinStr: hourMin};
+    return { monthStr: month1, dayStr: day.slice(0, 3), hourMinStr: hourMin };
 };
 
 const showMessage = (msg, isDebug, customStyle) => {
-    if(!msg) return;
-    
+    if (!msg) return;
+
     const italic = isDebug ? 'fst-italic' : '';
     const { userName, userMessage, userColor, date, isCustom } = msg;
-    
+
     const dateStr = dateFormating(date);
 
     const isCustomBadge = isCustom ? `<span class="badge text-bg-warning">custom</span>` : '';
-    const newStyle = customStyle ? customStyle : '';
-    
+    let newStyle = customStyle ? customStyle : '';
+    // newStyle += 'transition: 0.5s;animation: messageAppearing 1s;';
+    const newBackgroundColor = userColor.includes('hwb') ? userColor.replace(/\)/gm, ' / 33%)') : ''; // color in hwb
+
     chatArea.innerHTML += `
-    <div class="messageRow ${italic}" style="color: ${userColor};${newStyle}">
-        <div class="fw-semibold">${userName}:</div>
-        <div class="userMessage">${isCustomBadge} ${userMessage}</div>
-        <div class="fw-light text-end">${dateStr.monthStr} ${dateStr.dayStr}</div>
-        <div class="fw-light text-center">${dateStr.hourMinStr}</div>
+    <div class="messageRow2 ${italic}" style="color: ${userColor};background-color: ${newBackgroundColor};${newStyle}">
+        <div class="fw-semibold messageRow2__userName">
+            <div class="messageRow2__userName__name">${userName}:</div>
+            <div class="messageRow2__userName__date">${dateStr.monthStr} ${dateStr.dayStr} ${dateStr.hourMinStr}</div>
+        </div>
+        <div class="messageRow2__userMessage">${isCustomBadge} ${userMessage}</div>
     </div>
     `;
 
@@ -272,9 +284,9 @@ const showMessage = (msg, isDebug, customStyle) => {
 const showCustomMessage = (type, msg, customStyle) => {
     const date = new Date();
     showMessage({
-        userName: type || 'error', 
-        userMessage: msg, 
-        userColor: 'orange',
+        userName: type || 'error',
+        userMessage: msg,
+        userColor: '#ffa500',
         date
     }, true, customStyle);
 };
@@ -287,7 +299,7 @@ class refreshChatAreaLoop2 {
 
     constructor(rateMs1, stopAfter1, maxMsgs) {
         this.rateMs = rateMs1 || 3000;
-        this.stopAfter = stopAfter1;     
+        this.stopAfter = stopAfter1;
         this.maxMsgsOnServer = (maxMsgs && maxMsgs < 95) ? maxMsgs : 95; // restricts of mockapi.io (max 100)
     }
 
@@ -298,7 +310,7 @@ class refreshChatAreaLoop2 {
         let serverMsgAmount = messages.count;
         setStorageData(serverMsgAmount, 'messagesOnServerAmount');
 
-        if(serverMsgAmount > this.maxMsgsOnServer){ 
+        if (serverMsgAmount > this.maxMsgsOnServer) {
             await deleteMessages(true);
             chatAreaInit();
         }
@@ -308,19 +320,19 @@ class refreshChatAreaLoop2 {
         const sec = new Date().getSeconds();
         const checkRate = 5;
 
-        if(sec % checkRate == 0) this.deleteExtraMsgOnServer();
+        if (sec % checkRate == 0) this.deleteExtraMsgOnServer();
     }
 
     start(isUpdated) {
 
-        if(this.intervalId) return;
-        
+        if (this.intervalId) return;
+
         this.intervalId = setInterval(async () => {
             await getAndShowMessage2();
             this.checkAndDeleteMsgs();
         }, this.rateMs);
 
-        if(this.stopAfter) {
+        if (this.stopAfter) {
             setTimeout(() => {
                 this.stop();
             }, this.stopAfter);
@@ -333,14 +345,14 @@ class refreshChatAreaLoop2 {
     }
 
     stop(isUpdated) {
-        clearInterval( this.intervalId );
+        clearInterval(this.intervalId);
         this.intervalId = null;
         if (this.stopAfter && !isUpdated) showCustomMessage('client', 'refresh has been stopped');
         this.updateInfo(false);
     }
 
     update(rateMs1, stopAfter1) {
-        if(rateMs1 && (stopAfter1 || stopAfter1 == 0)) {
+        if (rateMs1 && (stopAfter1 || stopAfter1 == 0)) {
             this.rateMs = rateMs1;
             this.stopAfter = stopAfter1;
 
@@ -361,22 +373,23 @@ class refreshChatAreaLoop2 {
 
 const updateInfoString = () => {
     let chatInfoElem = document.querySelector('#chatInfo');
-    let { chatRefreshRateMs, chatStopRefreshAfterMs, messagesOnServerAmount  } = getStorageData();
-    chatInfoElem.textContent = `refresh each: ${ chatRefreshRateMs / 1000 } sec.; ` +
-                               `stop after: ${ chatStopRefreshAfterMs / 1000 } sec.; ` +
-                               `messages on server: ${ messagesOnServerAmount } ` +
-                               `(max: ${ refresh.maxMsgsOnServer })`;
-    
-    let onlineIndicator = document.querySelector('#isOnlineStatus');
-    if(getStorageData().isOnline == 'error') {
-        onlineIndicator.classList.replace('text-success', 'text-danger');
+    let { chatRefreshRateMs, chatStopRefreshAfterMs, messagesOnServerAmount } = getStorageData();
+    chatInfoElem.textContent = `refresh each: ${chatRefreshRateMs / 1000} sec.; ` +
+        `stop after: ${chatStopRefreshAfterMs / 1000} sec.; ` +
+        `messages on server: ${messagesOnServerAmount} ` +
+        `(max: ${refresh.maxMsgsOnServer})`;
+
+    let header = document.querySelector('.headerName');
+    if (getStorageData().isOnline == 'error') {
+        header.classList.replace('isOnline', 'isOffline');
     }
-    else if(getStorageData().isOnline) {
-        onlineIndicator.style.cssText = '';
-        onlineIndicator.classList.replace('text-danger', 'text-success');
-    } else if(!getStorageData().isOnline) {
-        onlineIndicator.style.cssText = 'display: none';
-    }                         
+    else if (getStorageData().isOnline) {
+        header.style.cssText = '';
+        header.classList.replace('isOffline', 'isOnline');
+    } else if (!getStorageData().isOnline) {
+        header.classList.remove('isOnline');
+        header.classList.remove('isOffline');
+    }
 };
 
 const clearInput = () => {
@@ -384,7 +397,7 @@ const clearInput = () => {
 };
 
 const setUserColorStyle = (id) => {
-    const colorCode = Math.trunc(( id / 1000000 ) * 359);;
+    const colorCode = Math.trunc((id / 1000000) * 359);;
     return `hwb(${colorCode}deg 0% 25%)`;
 };
 
@@ -408,15 +421,15 @@ const showUserInfo = () => {
 const toggleDarkTheme = state => {
 
     const elemsToDark = ['body', '#messageInput', 'h3', '#sendBtn', '#darkThemeBtn', '#chatTextArea', '#historyBtn'];
-    for(let elemName of elemsToDark) {
+    for (let elemName of elemsToDark) {
 
         let elem = document.querySelector(elemName);
 
-        if(state == 'on') {
+        if (state == 'on') {
             elem.classList.add('darkTheme');
             elem.classList.replace('btn-outline-primary', 'btn-outline-warning');
         }
-        else if(state == 'off') {
+        else if (state == 'off') {
             elem.classList.remove('darkTheme');
             elem.classList.replace('btn-outline-warning', 'btn-outline-primary');
         }
@@ -436,17 +449,17 @@ const showHistory = () => {
 
 const isOnlineLastHour = () => {
     const prevTime = getStorageData().isOnlineTimeStamp;
-    const nowMinusHour = new Date( new Date().setHours( new Date().getHours() - 1 ) ).getTime();
+    const nowMinusHour = new Date(new Date().setHours(new Date().getHours() - 1)).getTime();
 
-    if( nowMinusHour > prevTime ) {
-        setStorageData( new Date().getTime(), 'isOnlineTimeStamp' );
+    if (nowMinusHour > prevTime) {
+        setStorageData(new Date().getTime(), 'isOnlineTimeStamp');
         return false;
     }
     return true;
 };
 
 // events ---
-sendButton.addEventListener('click', () => { if(msgInput.value) sendMessage(msgInput.value) });
+sendButton.addEventListener('click', () => { if (msgInput.value) sendMessage(msgInput.value) });
 
 const darkThemeBtn = document.querySelector('#darkThemeBtn');
 darkThemeBtn.addEventListener('click', () => {
@@ -460,10 +473,10 @@ historyBtn.addEventListener('click', () => {
 });
 
 msgInput.addEventListener('keypress', event => {
-    if (event.code === 'Enter') if(msgInput.value) sendMessage(msgInput.value);
+    if (event.code === 'Enter') if (msgInput.value) sendMessage(msgInput.value);
 });
 document.querySelector('#clearCacheBtn').addEventListener('click', () => {
-    
+
     localStorage.removeItem('messangerData');
     showCustomMessage('client', 'your username and data have been deleted in localStorage, reload this page');
 });
@@ -479,29 +492,29 @@ const modalBtnsElem = document.querySelector('#modalBtns');
 const modalNameInput = document.querySelector('#modalNameInput');
 const modalApiKeyInput = document.querySelector('#modalApiKeyInput');
 
-if ( !localStorage.messangerData ) {
+if (!localStorage.messangerData) {
     myModal.show();
 } else {
     chatAreaInit();
     refresh.start();
-    toggleDarkTheme( getStorageData().isDark );
-    if( !isOnlineLastHour() ) sendMessage(`${getStorageData().userName} is online`);
+    toggleDarkTheme(getStorageData().isDark);
+    if (!isOnlineLastHour()) sendMessage(`${getStorageData().userName} is online`);
 }
 
 console.log('to see some interesting options type "/debug"');
 
 // events2 ---
-modalNameInput.addEventListener('keypress', event => {if (event.code === 'Enter') document.querySelector('#modalBtnOK').click();});
-modalApiKeyInput.addEventListener('keypress', event => {if (event.code === 'Enter') document.querySelector('#modalBtnOK').click();});
+modalNameInput.addEventListener('keypress', event => { if (event.code === 'Enter') document.querySelector('#modalBtnOK').click(); });
+modalApiKeyInput.addEventListener('keypress', event => { if (event.code === 'Enter') document.querySelector('#modalBtnOK').click(); });
 
 modalBtnsElem.addEventListener('click', (e) => {
 
     let id = e.target.id;
-    if ( id == 'modalBtnOK' || id == 'modalBtnClose' ) {
+    if (id == 'modalBtnOK' || id == 'modalBtnClose') {
         const userName = document.querySelector('#modalNameInput').value;
         const apiKey = document.querySelector('#modalApiKeyInput').value;
 
-        if(!apiKey) {
+        if (!apiKey) {
             myModal.hide();
             showCustomMessage('client', `${apiKey} missing/invalid apiKey for access to mockapi.io, refresh page and enter api key again`);
             return;
@@ -513,8 +526,8 @@ modalBtnsElem.addEventListener('click', (e) => {
 
         setStorageData(true, 'isAlwaysOnline');
         setStorageData('off', 'isDark');
-        setStorageData( new Date().getTime(), 'isOnlineTimeStamp' );
-     
+        setStorageData(new Date().getTime(), 'isOnlineTimeStamp');
+
         myModal.hide();
         sendMessage(`new user "${getStorageData().userName}" has registered`);
     }
@@ -528,39 +541,39 @@ document.addEventListener('messangerEvent.isCode', (e) => {
         case '/rate':
             const [rate, stop] = codeValue.split(' ');
             const newRate = +rate * 1000;
-            if(newRate < 0.25) return;
+            if (newRate < 0.25) return;
             const newStop = stop ? +stop * 1000 : false;
             refresh.update(newRate, newStop);
             break;
-        
+
         case '/stop':
-            refresh.update(1000,100);
+            refresh.update(1000, 100);
             break;
-      
+
         case '/info':
             showUserInfo();
             break;
 
         case '/change':
             const [name, color] = codeValue.split('_');
-            if(name) setStorageData(name.slice(0, 9), 'userName');
-            if(color) setStorageData(color, 'userColor');
+            if (name) setStorageData(name.slice(0, 9), 'userName');
+            if (color) setStorageData(color, 'userColor');
             showUserInfo();
             break;
-        
+
         case '/del':
-            if(Number.isInteger(+codeValue)) deleteMessages(false, +codeValue);
+            if (Number.isInteger(+codeValue)) deleteMessages(false, +codeValue);
             showCustomMessage('client', 'you have been deleted some messages on server');
             break;
 
         case '/msg':
 
-            if( !codeValue ) return;
-            
-            let msgBody = JSON.parse( codeValue );
-            
-            if( Object.keys(msgBody).length == 0 ) return;
-            
+            if (!codeValue) return;
+
+            let msgBody = JSON.parse(codeValue);
+
+            if (Object.keys(msgBody).length == 0) return;
+
             Object.assign(msgBody, {
                 isCustom: true,
                 trueDate: new Date(),
@@ -574,12 +587,12 @@ document.addEventListener('messangerEvent.isCode', (e) => {
 
             const historyData = getStorageData().history;
 
-            if ( localStorage.hasOwnProperty('messangerHistoryBackUp') ) {
-                localStorage.setItem( 'messangerHistoryBackUp', JSON.stringify(historyData) );
+            if (localStorage.hasOwnProperty('messangerHistoryBackUp')) {
+                localStorage.setItem('messangerHistoryBackUp', JSON.stringify(historyData));
             } else {
-                let prevHistoryArr = JSON.parse( localStorage.getItem( 'messangerHistoryBackUp' ) );
+                let prevHistoryArr = JSON.parse(localStorage.getItem('messangerHistoryBackUp'));
                 let newHistoryArr = [...prevHistoryArr, historyData];
-                localStorage.setItem( 'messangerHistoryBackUp', JSON.stringify(newHistoryArr) );
+                localStorage.setItem('messangerHistoryBackUp', JSON.stringify(newHistoryArr));
             }
 
             showCustomMessage('client', 'history has been saved in localStorage.messangerHistoryBackUp');
@@ -597,21 +610,21 @@ document.addEventListener('messangerEvent.isCode', (e) => {
 
         case '/debug':
             const debugElems = document.querySelectorAll('.debugElemHide');
-            for(let elem of debugElems) {
+            for (let elem of debugElems) {
                 elem.classList.remove('debugElemHide');
             };
             break;
 
         default:
             return;
-      }
+    }
 });
 
 document.addEventListener('messangerEvent.storageUpdated', e => {
-   
+
     updateInfoString();
-    
-    if( Object.keys(e.prop)[0] == 'isDark' ) {
+
+    if (Object.keys(e.prop)[0] == 'isDark') {
         toggleDarkTheme(e.prop.isDark);
     }
 });
