@@ -5,6 +5,8 @@
 .chatTextArea {
     height: 500px;
     overflow: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .headerName,
@@ -32,8 +34,6 @@
         font-size: 2em;
     }
 }
-
-
 
 .headerName.isOnline {
     transition: 1s;
@@ -79,18 +79,38 @@
 .messageRow2 {
     display: flex;
     flex-direction: column;
-    color: #00d200;
-    padding: 8px 5px;
+    padding: 0.7em 1em;
+    margin: 0.3em 0em;
+    border-radius: 0.6em;
+    margin-right: 3em;
+}
+.messageRow2.currentUserMsg {
+    margin-left: 3em;
+    margin-right: 0em;
 }
 
-@keyframes messageAppearing {
+@keyframes messageAppearing { /* envoke from script.js */
     from {
-        opacity: 0;
-        transform: rotate();
+        transform: scale(1.0);
+    }
+    50% {
+        transform: scale(1.025);
     }
     to {
-        opacity: 1;
-        transform: rotate();
+        transform: scale(1.0);
+    }
+}
+
+@media screen and (min-width: 1000px) {
+    #chatTextArea {
+        padding: 0em 3.7em;
+    }
+    .messageRow2 {
+        margin-right: 6em;
+    }
+    .messageRow2.currentUserMsg {
+        margin-left: 6em;
+        margin-right: 0em;
     }
 }
 
@@ -102,7 +122,8 @@
 .messageRow2 > .messageRow2__userName {
     display: flex;
     justify-content: space-between;
-}
+    margin-bottom: 0.3em;
+} 
 
 .messageRow2__userName >.messageRow2__userName__date {
     font-weight: 100;
@@ -122,12 +143,12 @@ input.darkTheme:focus {
 h3.darkTheme,
 input.darkTheme,
 input.darkTheme:focus {
-    color: wheat;
+    color: #f5deb3;
     border-color: #a89777 !important;
 }
 
 #chatTextArea.darkTheme {
-    border-color: wheat !important;
+    border-color: #f5deb3 !important;
 }
 
 p.debugElemHide {
@@ -137,14 +158,31 @@ p.debugElemHide {
     opacity: 0;
 }
 
-#chatTextArea,
-.input-group {
+#chatTextArea.stackedAnimation,
+#input-groupAnimated.stackedAnimation {
     transition: 0.3s;
     animation-name: scaleShort;
+    animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19);
+    animation-duration: 0.3s;
+}
+#input-groupAnimated.stackedAnimation {
+    animation-delay: 0.1s;
+}
+/* .repeatAnimation {
+    display: none;
+} */
+
+#messageInput:focus {
+    transition: 0.3s;
+    animation-name: scaleShort;
+    animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19);
     animation-duration: 0.2s;
 }
-.input-group {
-    animation-delay: 0.4s;
+
+body.specialAnimation {
+    transition: 0.3s;
+    animation-name: easterEggAnimaton;
+    animation-duration: 5s;
 }
 @keyframes scaleShort {
     from {
@@ -156,4 +194,19 @@ p.debugElemHide {
     to {
         transform: scale(1.0);
     }
+}
+
+@keyframes easterEggAnimaton {
+    from {
+        transform: rotate3d(0, 5, 1, 0deg);;
+    }
+
+    to {
+        transform: rotate3d(0, 5, 1, 360deg);;
+    }
+}
+
+.messageRow2.lastMessageAnimate {
+    transition: 0.5s;
+    animation: messageAppearing 1s;
 }

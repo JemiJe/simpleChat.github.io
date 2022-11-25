@@ -15,19 +15,14 @@
 
   <div class="container">
     <h3 class="mt-5 headerName isOnline">simple messanger</h3>
-    <!-- <div class="onlineStatus">
-          <div id="isOnlineStatus" class="spinner-grow spinner-grow-sm text-success" role="status" style="display: none;">
-            <span class="visually-hidden">Loading...</span>
-          </div>
-        </div> -->
     <div class="mb-3 text-secondary">
       <span id="chatInfo" class="debugElemHide"></span>
       <span style="float: right;">mockapi.io server</span>
     </div>
     <div class="form-floating">
-      <div id="chatTextArea" class="container border chatTextArea"></div>
+      <div id="chatTextArea" class="container border chatTextArea stackedAnimation"></div>
     </div>
-    <div class="input-group shadow-sm mb-3">
+    <div id="input-groupAnimated" class="input-group shadow-sm mb-3 stackedAnimation">
       <button class="btn btn-outline-primary" type="button" id="sendBtn">Send</button>
       <input id="messageInput" type="text" class="form-control border-primary" placeholder="your message here..."
         aria-label="Send" aria-describedby="button-addon2">
@@ -55,6 +50,7 @@
       <span class="font-monospace">'/saveHistory'</span> back up history (wont be deleted after clearCache)<br>
       <span class="font-monospace">'/baseUrl:: url'</span> set new base url<br>
       <span class="font-monospace">'/apiKey:: key'</span> set new api key (optional)<br>
+      <span class="font-monospace">'/wow'</span> shows special animation<br>
     </p>
   </div>
 

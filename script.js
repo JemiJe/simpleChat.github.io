@@ -1,9 +1,11 @@
-// simple chat v1.0 (03 Nov 2022)
+// simple chat v1.0 (24 Nov 2022)
 // https://github.com/JemiJe/simpleChat.github.io
 
 const sendButton = document.querySelector('#sendBtn');
 const chatArea = document.querySelector('#chatTextArea');
 const msgInput = document.querySelector('#messageInput');
+
+const consoleLogStyle = 'background: #ffc107; color: #282726; display: inline-block; padding: 5px';
 
 const setBaseUrl = baseUrl => {
     setStorageData(baseUrl, 'baseUrl');
@@ -38,7 +40,7 @@ const userInfoInit = (name, apiKey) => {
 const setNameAndId = (name) => {
     const randNum = Math.trunc(Math.random() * 1000000);
 
-    let newName = name ? name.slice(0, 9) : 'user' + randNum;
+    let newName = name ? name.slice(0, 34) : 'user' + randNum;
     const id = randNum;
     const userMsgColor = setUserColorStyle(id);
 
@@ -125,7 +127,7 @@ const deleteMessages = async (onlyOne, amount) => {
             await new Promise(r => setTimeout(r, 300));
             await fetch(`${baseUrl}/${id}`, { method: 'DELETE' });
         }
-        console.log('some messages have been deleted (due to refreshChatAreaLoop2 .maxMsgsOnServer value )');
+        console.log('some messages have been deleted (due to refreshChatAreaLoop2 .maxMsgsOnServer value )', consoleLogStyle);
     } catch (error) {
         console.log(error);
     }
@@ -150,11 +152,29 @@ const getAndShowMessage2 = async () => {
 
                 msgsArrCurrent.splice(0, msgsArrPrev.length);
 
-                for (let msg of msgsArrCurrent) {
-                    if (msg !== undefined) showMessage(msg);
+                for(let i = 0; i < msgsArrCurrent.length; i++) {
+                    
+                    let msg = msgsArrCurrent[i];          
+                    
+                    if (msg !== undefined) {
+
+                        if(i == msgsArrCurrent.length - 1) {
+                            showMessage(msg, false, false, true);
+                        } else {
+                            showMessage(msg);
+                        }
+                    }
+                    
                     setStorageData(++curentMsgsAmount, 'messagesCounter');
                     setStorageData([...getStorageData().history, msg], 'history');
                 }
+
+                // for (let msg of msgsArrCurrent) {
+                //     msg.isLast = false;
+                //     if (msg !== undefined) showMessage(msg);
+                //     setStorageData(++curentMsgsAmount, 'messagesCounter');
+                //     setStorageData([...getStorageData().history, msg], 'history');
+                // }
             }
         }
         if (resp.status == 429) {
@@ -205,7 +225,7 @@ const chatAreaInit = () => {
 
                 for(let i = 0; i < allMessagesItems.length; i++) {
                     if( i === allMessagesItems.length - 1 ) {
-                        showMessage(allMessagesItems[i], false, 'transition: 0.5s;animation: messageAppearing 1s;');
+                        showMessage(allMessagesItems[i], false);
                         return;
                     }
                     showMessage(allMessagesItems[i]);
@@ -255,26 +275,31 @@ const dateFormating = dateObj => {
     return { monthStr: month1, dayStr: day.slice(0, 3), hourMinStr: hourMin };
 };
 
-const showMessage = (msg, isDebug, customStyle) => {
+const showMessage = (msg, isDebug, customStyle, isLast) => {
     if (!msg) return;
 
     const italic = isDebug ? 'fst-italic' : '';
-    const { userName, userMessage, userColor, date, isCustom } = msg;
+    let { userName, userMessage, userColor, date, isCustom, userId, trueUserId } = msg;
 
     const dateStr = dateFormating(date);
 
-    const isCustomBadge = isCustom ? `<span class="badge text-bg-warning">custom</span>` : '';
+    const isCustomBadge = isCustom ? `<span class="badge text-bg-warning">${userName}(custom, id:${trueUserId})</span>` : '';
+    if(isCustom) userName = '';
+    
     let newStyle = customStyle ? customStyle : '';
-    // newStyle += 'transition: 0.5s;animation: messageAppearing 1s;';
-    const newBackgroundColor = userColor.includes('hwb') ? userColor.replace(/\)/gm, ' / 33%)') : ''; // color in hwb
+    let isLastClass = isLast ? 'lastMessageAnimate' : '';
+    
+    const newBackgroundColor = userColor.includes('hwb') ? userColor.replace(/\)/gm, ' / 15%)') : ''; // color in hwb
+
+    const isCurrentUserClass = getStorageData().userId === userId ? 'currentUserMsg' : '';
 
     chatArea.innerHTML += `
-    <div class="messageRow2 ${italic}" style="color: ${userColor};background-color: ${newBackgroundColor};${newStyle}">
+    <div class="messageRow2 ${isLastClass} ${italic} ${isCurrentUserClass}" style="color: ${userColor};background-color: ${newBackgroundColor};${newStyle}">
         <div class="fw-semibold messageRow2__userName">
-            <div class="messageRow2__userName__name">${userName}:</div>
+            <div class="messageRow2__userName__name">${userName} ${isCustomBadge}</div>
             <div class="messageRow2__userName__date">${dateStr.monthStr} ${dateStr.dayStr} ${dateStr.hourMinStr}</div>
         </div>
-        <div class="messageRow2__userMessage">${isCustomBadge} ${userMessage}</div>
+        <div class="messageRow2__userMessage">${userMessage}</div>
     </div>
     `;
 
@@ -384,8 +409,9 @@ const updateInfoString = () => {
         header.classList.replace('isOnline', 'isOffline');
     }
     else if (getStorageData().isOnline) {
-        header.style.cssText = '';
+        // header.style.cssText = '';
         header.classList.replace('isOffline', 'isOnline');
+        header.classList.add('isOnline');
     } else if (!getStorageData().isOnline) {
         header.classList.remove('isOnline');
         header.classList.remove('isOffline');
@@ -398,7 +424,7 @@ const clearInput = () => {
 
 const setUserColorStyle = (id) => {
     const colorCode = Math.trunc((id / 1000000) * 359);;
-    return `hwb(${colorCode}deg 0% 25%)`;
+    return `hwb(${colorCode}deg 0% 10%)`;
 };
 
 const isSpecCode = msg => {
@@ -428,12 +454,22 @@ const toggleDarkTheme = state => {
         if (state == 'on') {
             elem.classList.add('darkTheme');
             elem.classList.replace('btn-outline-primary', 'btn-outline-warning');
+            applyAnimation('stackedAnimation', '#chatTextArea, .input-group');
         }
         else if (state == 'off') {
             elem.classList.remove('darkTheme');
             elem.classList.replace('btn-outline-warning', 'btn-outline-primary');
+            applyAnimation('stackedAnimation', '#chatTextArea, .input-group');
         }
     }
+}
+
+const applyAnimation = (animationClass, elemsSelectors) => {
+
+   const elems = document.querySelectorAll(elemsSelectors);
+   for(let elem of elems) {
+        elem.classList.add(animationClass);
+   }
 }
 
 const showHistory = () => {
@@ -501,7 +537,7 @@ if (!localStorage.messangerData) {
     if (!isOnlineLastHour()) sendMessage(`${getStorageData().userName} is online`);
 }
 
-console.log('to see some interesting options type "/debug"');
+console.log(`%cSimpleChat v1.0 | to see some interesting options type "/debug"`, consoleLogStyle);
 
 // events2 ---
 modalNameInput.addEventListener('keypress', event => { if (event.code === 'Enter') document.querySelector('#modalBtnOK').click(); });
@@ -530,6 +566,8 @@ modalBtnsElem.addEventListener('click', (e) => {
 
         myModal.hide();
         sendMessage(`new user "${getStorageData().userName}" has registered`);
+
+        document.querySelector('.headerName').classList.add('isOnline');
     }
 });
 
@@ -556,7 +594,7 @@ document.addEventListener('messangerEvent.isCode', (e) => {
 
         case '/change':
             const [name, color] = codeValue.split('_');
-            if (name) setStorageData(name.slice(0, 9), 'userName');
+            if (name) setStorageData(name, 'userName');
             if (color) setStorageData(color, 'userColor');
             showUserInfo();
             break;
@@ -608,6 +646,10 @@ document.addEventListener('messangerEvent.isCode', (e) => {
             showCustomMessage('client', `new api key: ${getStorageData().apiKey} was set for ${getStorageData().baseUrl}`);
             break;
 
+        case '/wow':
+            document.querySelector('body').classList.add('specialAnimation');
+            break;
+
         case '/debug':
             const debugElems = document.querySelectorAll('.debugElemHide');
             for (let elem of debugElems) {
@@ -626,5 +668,23 @@ document.addEventListener('messangerEvent.storageUpdated', e => {
 
     if (Object.keys(e.prop)[0] == 'isDark') {
         toggleDarkTheme(e.prop.isDark);
+    }
+});
+
+document.addEventListener( 'animationend', e => {
+
+    const animatedElemsSelectors = '#input-groupAnimated, #chatTextArea, .messageRow2, body';
+    const animationsClassNames = [ 'lastMessageAnimate', 'specialAnimation', 'stackedAnimation' ];
+
+    const elems = document.querySelectorAll(animatedElemsSelectors);
+
+    for(let elem of elems) {
+        
+        for(let animation of animationsClassNames) {
+   
+            if( elem.classList.value.includes(animation) ) {
+                elem.classList.remove(animation);
+            }
+        }
     }
 });
