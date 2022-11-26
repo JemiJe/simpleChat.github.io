@@ -14,6 +14,19 @@
     display: inline-block;
 }
 
+.headerName {
+    margin-top: 1em !important;
+}
+@media screen and (max-width: 1000px) {
+    .headerName {
+        margin-top: 0.5em !important;
+        font-size: 1.5em;
+    }
+    .mb-3 {
+        margin-bottom: 0.5rem !important;
+    }
+}
+
 @media screen and (max-height: 700px) {
     .chatTextArea, #chatTextArea {
         height: 400px;
@@ -87,6 +100,10 @@
 .messageRow2.currentUserMsg {
     margin-left: 3em;
     margin-right: 0em;
+}
+.messageRow2.debugMsg {
+    color: #ffa500;
+    background: linear-gradient(to right, #ffa60010, #ffa60000 50%);
 }
 
 @keyframes messageAppearing { /* envoke from script.js */

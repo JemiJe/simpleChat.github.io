@@ -126,6 +126,8 @@ const deleteMessages = async (onlyOne, amount) => {
         for (let id of messagesIds) {
             await new Promise(r => setTimeout(r, 300));
             await fetch(`${baseUrl}/${id}`, { method: 'DELETE' });
+            clearChatArea();
+            chatAreaInit();
         }
         console.log('some messages have been deleted (due to refreshChatAreaLoop2 .maxMsgsOnServer value )', consoleLogStyle);
     } catch (error) {
@@ -152,19 +154,21 @@ const getAndShowMessage2 = async () => {
 
                 msgsArrCurrent.splice(0, msgsArrPrev.length);
 
-                for(let i = 0; i < msgsArrCurrent.length; i++) {
-                    
-                    let msg = msgsArrCurrent[i];          
-                    
+                for (let i = 0; i < msgsArrCurrent.length; i++) {
+
+                    let msg = msgsArrCurrent[i];
+
                     if (msg !== undefined) {
 
-                        if(i == msgsArrCurrent.length - 1) {
-                            showMessage(msg, false, false, true);
+                        clearChatArea();
+
+                        if (i == msgsArrCurrent.length - 1) {
+                            showMessage(msg, false, false, true); // mark as last message for animation
                         } else {
                             showMessage(msg);
                         }
                     }
-                    
+
                     setStorageData(++curentMsgsAmount, 'messagesCounter');
                     setStorageData([...getStorageData().history, msg], 'history');
                 }
@@ -200,6 +204,7 @@ const chatAreaInit = () => {
             }
 
             if (response.status !== 200) {
+                clearChatArea();
                 chatAreaInit();
                 return;
             }
@@ -223,8 +228,10 @@ const chatAreaInit = () => {
 
                 setStorageData(allMessagesItems, 'messagesArr');
 
-                for(let i = 0; i < allMessagesItems.length; i++) {
-                    if( i === allMessagesItems.length - 1 ) {
+                clearChatArea();
+
+                for (let i = 0; i < allMessagesItems.length; i++) {
+                    if (i === allMessagesItems.length - 1) {
                         showMessage(allMessagesItems[i], false);
                         return;
                     }
@@ -279,22 +286,23 @@ const showMessage = (msg, isDebug, customStyle, isLast) => {
     if (!msg) return;
 
     const italic = isDebug ? 'fst-italic' : '';
+    const debugStyleClass = isDebug ? 'debugMsg' : '';
     let { userName, userMessage, userColor, date, isCustom, userId, trueUserId } = msg;
 
     const dateStr = dateFormating(date);
 
     const isCustomBadge = isCustom ? `<span class="badge text-bg-warning">${userName}(custom, id:${trueUserId})</span>` : '';
-    if(isCustom) userName = '';
-    
+    if (isCustom) userName = '';
+
     let newStyle = customStyle ? customStyle : '';
     let isLastClass = isLast ? 'lastMessageAnimate' : '';
-    
+
     const newBackgroundColor = userColor.includes('hwb') ? userColor.replace(/\)/gm, ' / 15%)') : ''; // color in hwb
 
     const isCurrentUserClass = getStorageData().userId === userId ? 'currentUserMsg' : '';
 
     chatArea.innerHTML += `
-    <div class="messageRow2 ${isLastClass} ${italic} ${isCurrentUserClass}" style="color: ${userColor};background-color: ${newBackgroundColor};${newStyle}">
+    <div class="messageRow2 ${debugStyleClass} ${isLastClass} ${italic} ${isCurrentUserClass}" style="color: ${userColor};background-color: ${newBackgroundColor};${newStyle}">
         <div class="fw-semibold messageRow2__userName">
             <div class="messageRow2__userName__name">${userName} ${isCustomBadge}</div>
             <div class="messageRow2__userName__date">${dateStr.monthStr} ${dateStr.dayStr} ${dateStr.hourMinStr}</div>
@@ -337,7 +345,6 @@ class refreshChatAreaLoop2 {
 
         if (serverMsgAmount > this.maxMsgsOnServer) {
             await deleteMessages(true);
-            chatAreaInit();
         }
     }
 
@@ -348,6 +355,18 @@ class refreshChatAreaLoop2 {
         if (sec % checkRate == 0) this.deleteExtraMsgOnServer();
     }
 
+    deleteExtraMsgElems() {
+        let msgElemsArr = [...document.querySelectorAll('.messageRow2')];
+
+        if( msgElemsArr.length > this.maxMsgsOnServer ) {
+            let extraAmount = msgElemsArr.length - this.maxMsgsOnServer;
+
+            for(let i = 0; i < extraAmount; i++) {
+                msgElemsArr[i].remove();
+            }
+        }
+    }
+
     start(isUpdated) {
 
         if (this.intervalId) return;
@@ -355,6 +374,7 @@ class refreshChatAreaLoop2 {
         this.intervalId = setInterval(async () => {
             await getAndShowMessage2();
             this.checkAndDeleteMsgs();
+            this.deleteExtraMsgElems();
         }, this.rateMs);
 
         if (this.stopAfter) {
@@ -466,10 +486,10 @@ const toggleDarkTheme = state => {
 
 const applyAnimation = (animationClass, elemsSelectors) => {
 
-   const elems = document.querySelectorAll(elemsSelectors);
-   for(let elem of elems) {
+    const elems = document.querySelectorAll(elemsSelectors);
+    for (let elem of elems) {
         elem.classList.add(animationClass);
-   }
+    }
 }
 
 const showHistory = () => {
@@ -503,10 +523,10 @@ darkThemeBtn.addEventListener('click', () => {
     setStorageData(newValue, 'isDark');
 });
 
-const historyBtn = document.querySelector('#historyBtn');
-historyBtn.addEventListener('click', () => {
-    showHistory();
-});
+// const historyBtn = document.querySelector('#historyBtn');
+// historyBtn.addEventListener('click', () => {
+//     showHistory();
+// });
 
 msgInput.addEventListener('keypress', event => {
     if (event.code === 'Enter') if (msgInput.value) sendMessage(msgInput.value);
@@ -561,7 +581,7 @@ modalBtnsElem.addEventListener('click', (e) => {
         refresh.start();
 
         setStorageData(true, 'isAlwaysOnline');
-        setStorageData('off', 'isDark');
+        setStorageData('on', 'isDark');
         setStorageData(new Date().getTime(), 'isOnlineTimeStamp');
 
         myModal.hide();
@@ -657,6 +677,11 @@ document.addEventListener('messangerEvent.isCode', (e) => {
             };
             break;
 
+        case '/reset':
+            localStorage.removeItem('messangerData');
+            showCustomMessage('client', 'your username and data have been deleted in localStorage, reload this page');
+            break;
+
         default:
             return;
     }
@@ -671,18 +696,18 @@ document.addEventListener('messangerEvent.storageUpdated', e => {
     }
 });
 
-document.addEventListener( 'animationend', e => {
+document.addEventListener('animationend', e => {
 
     const animatedElemsSelectors = '#input-groupAnimated, #chatTextArea, .messageRow2, body';
-    const animationsClassNames = [ 'lastMessageAnimate', 'specialAnimation', 'stackedAnimation' ];
+    const animationsClassNames = ['lastMessageAnimate', 'specialAnimation', 'stackedAnimation'];
 
     const elems = document.querySelectorAll(animatedElemsSelectors);
 
-    for(let elem of elems) {
-        
-        for(let animation of animationsClassNames) {
-   
-            if( elem.classList.value.includes(animation) ) {
+    for (let elem of elems) {
+
+        for (let animation of animationsClassNames) {
+
+            if (elem.classList.value.includes(animation)) {
                 elem.classList.remove(animation);
             }
         }
